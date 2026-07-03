@@ -7,10 +7,18 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
+    pcd_save_path = LaunchConfiguration('pcd_save_path')
+    publish_tf = LaunchConfiguration('publish_tf')
     # Declare the RViz argument
     rviz_arg = DeclareLaunchArgument(
         'rviz', default_value='true',
         description='Flag to launch RViz.')
+    pcd_save_path_arg = DeclareLaunchArgument(
+        'pcd_save_path', default_value='/tmp/point_lio_r2_map.pcd',
+        description='Output path for the built-in Point-LIO PCD saver.')
+    publish_tf_arg = DeclareLaunchArgument(
+        'publish_tf', default_value='true',
+        description='Publish Point-LIO raw odometry TF.')
 
     # Node parameters, including those from the YAML configuration file
     laser_mapping_params = [
@@ -23,12 +31,18 @@ def generate_launch_description():
             'prop_at_freq_of_imu': True,
             'check_satu': True,
             'init_map_size': 10,
-            'point_filter_num': 3,  # Options: 1, 3
+            'point_filter_num': 1,  # Options: 1, 3
             'space_down_sample': True,
-            'filter_size_surf': 0.5,  # Options: 0.5, 0.3, 0.2, 0.15, 0.1
-            'filter_size_map': 0.5,  # Options: 0.5, 0.3, 0.15, 0.1
+            'filter_size_surf': 0.1,  # Options: 0.5, 0.3, 0.2, 0.15, 0.1
+            'filter_size_map': 0.3,  # Options: 0.5, 0.3, 0.15, 0.1
             'cube_side_length': 1000.0,  # Option: 1000
             'runtime_pos_log_enable': False,  # Option: True
+            'odom_header_frame_id': 'odom',
+            'odom_child_frame_id': 'point_lio_body',
+            'publish_tf': publish_tf,
+            'pcd_save.pcd_save_en': True,
+            'pcd_save.interval': -1,
+            'pcd_save.path': pcd_save_path,
         }
     ]
 
@@ -58,6 +72,8 @@ def generate_launch_description():
     # Assemble the launch description
     ld = LaunchDescription([
         rviz_arg,
+        pcd_save_path_arg,
+        publish_tf_arg,
         laser_mapping_node,
         GroupAction(
             actions=[rviz_node],

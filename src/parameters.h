@@ -12,6 +12,7 @@
 extern bool odom_only;
 extern std::string odom_header_frame_id;
 extern std::string odom_child_frame_id;
+extern std::string pcd_save_path;
 
 extern bool is_first_frame;
 extern double lidar_end_time, first_lidar_time, time_con;
@@ -21,7 +22,7 @@ extern int pcd_index;
 extern std::string lid_topic, imu_topic;
 extern bool prop_at_freq_of_imu, check_satu, con_frame, cut_frame;
 extern bool use_imu_as_input, space_down_sample;
-extern bool extrinsic_est_en, publish_odometry_without_downsample;
+extern bool extrinsic_est_en, publish_odometry_without_downsample, publish_tf;
 extern int init_map_size, con_frame_num;
 extern double match_s, satu_acc, satu_gyro, cut_frame_time_interval;
 extern float plane_thr;

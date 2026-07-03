@@ -3,6 +3,7 @@
 #include <cmath>
 #include <thread>
 #include <fstream>
+#include <iomanip>
 #include <csignal>
 #include <Python.h>
 #include <so3_math.h>
@@ -517,6 +518,39 @@ void publish_init_kdtree(const rclcpp::Publisher<sensor_msgs::msg::PointCloud2>:
 PointCloudXYZI::Ptr pcl_wait_pub(new PointCloudXYZI(500000, 1));
 PointCloudXYZI::Ptr pcl_wait_save(new PointCloudXYZI());
 
+string initial_pose_path_for_pcd(const string &pcd_path) {
+    const string suffix = ".pcd";
+    if (pcd_path.size() >= suffix.size() &&
+        pcd_path.compare(pcd_path.size() - suffix.size(), suffix.size(), suffix) == 0) {
+        return pcd_path.substr(0, pcd_path.size() - suffix.size()) + "_initial_pose.yaml";
+    }
+    return pcd_path + "_initial_pose.yaml";
+}
+
+void save_initial_pose_yaml(const string &pcd_path) {
+    const string pose_path = initial_pose_path_for_pcd(pcd_path);
+    ofstream out(pose_path);
+    if (!out.is_open()) {
+        cout << "failed to save Point-LIO initial pose to " << pose_path << endl;
+        return;
+    }
+
+    out << fixed << setprecision(9);
+    out << "frame_id: map\n";
+    out << "child_frame_id: base_link\n";
+    out << "pose:\n";
+    out << "  position:\n";
+    out << "    x: 0.0\n";
+    out << "    y: 0.0\n";
+    out << "    z: 0.0\n";
+    out << "  orientation:\n";
+    out << "    x: 0.0\n";
+    out << "    y: 0.0\n";
+    out << "    z: 0.0\n";
+    out << "    w: 1.0\n";
+    cout << "Point-LIO initial pose saved to " << pose_path << endl;
+}
+
 void publish_frame_world(const rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr &pubLaserCloudFullRes) {
 
     if (odom_only) {return;}
@@ -689,7 +723,9 @@ void publish_odometry(const rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPt
 
     transform.header.stamp = odomAftMapped.header.stamp;
 
-    tf_br->sendTransform(transform);
+    if (publish_tf) {
+        tf_br->sendTransform(transform);
+    }
 }
 
 void publish_path(const rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr &pubPath) {
@@ -1310,10 +1346,13 @@ int main(int argc, char **argv) {
     /* 1. make sure you have enough memories
        2. noted that pcd save will influence the real-time performences **/
     if (pcl_wait_save->size() > 0 && pcd_save_en) {
-        string file_name = string("scans.pcd");
-        string all_points_dir(string(string(ROOT_DIR) + "PCD/") + file_name);
+        string all_points_dir = pcd_save_path.empty()
+            ? string(string(ROOT_DIR) + "../rc2026_nav2_bringup/maps/r2_map.pcd")
+            : pcd_save_path;
         pcl::PCDWriter pcd_writer;
+        cout << "Point-LIO PCD saved to " << all_points_dir << endl;
         pcd_writer.writeBinary(all_points_dir, *pcl_wait_save);
+        save_initial_pose_yaml(all_points_dir);
     }
     fout_out.close();
     fout_imu_pbp.close();

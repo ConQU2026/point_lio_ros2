@@ -28,7 +28,13 @@
   <depend>pcl_ros</depend> <!-- For PCL support -->
   <depend>pcl_conversions</depend> <!-- For PCL support -->
   <depend>visualization_msgs</depend> <!-- For visualization_msgs support -->
-  <!-- <depend>livox_ros_driver2</depend> -->
+
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>cpp_lidar_filter</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>livox_ros_driver2</exec_depend>
+  <exec_depend>r2_spawner</exec_depend>
 
   <!-- test_depend remains the same, but make sure the testing tools you use are compatible with ROS2 -->
   <test_depend>ament_lint_auto</test_depend>

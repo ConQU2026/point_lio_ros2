@@ -2,6 +2,7 @@
 
 bool odom_only;
 std::string odom_header_frame_id, odom_child_frame_id;
+std::string pcd_save_path;
 
 bool is_first_frame = true;
 double lidar_end_time = 0.0, first_lidar_time = 0.0, time_con = 0.0;
@@ -10,7 +11,7 @@ int pcd_index = 0;
 
 std::string lid_topic, imu_topic;
 bool prop_at_freq_of_imu, check_satu, con_frame, cut_frame;
-bool use_imu_as_input, space_down_sample, publish_odometry_without_downsample;
+bool use_imu_as_input, space_down_sample, publish_odometry_without_downsample, publish_tf;
 int init_map_size, con_frame_num;
 double match_s, satu_acc, satu_gyro, cut_frame_time_interval;
 float plane_thr;
@@ -87,12 +88,14 @@ void readParameters(shared_ptr<rclcpp::Node> &nh) {
     nh->declare_parameter<std::vector<double>>("mapping.extrinsic_T", {0, 0, 0});
     nh->declare_parameter<std::vector<double>>("mapping.extrinsic_R", {1, 0, 0, 0, 1, 0, 0, 0, 1});
     nh->declare_parameter<bool>("odometry.publish_odometry_without_downsample", false);
+    nh->declare_parameter<bool>("publish_tf", true);
     nh->declare_parameter<bool>("publish.path_en", true);
     nh->declare_parameter<bool>("publish.scan_publish_en", true);
     nh->declare_parameter<bool>("publish.scan_bodyframe_pub_en", true);
     nh->declare_parameter<bool>("runtime_pos_log_enable", false);
     nh->declare_parameter<bool>("pcd_save.pcd_save_en", false);
     nh->declare_parameter<int>("pcd_save.interval", -1);
+    nh->declare_parameter<std::string>("pcd_save.path", "");
 
     // 使用get_parameter方法获取参数值
     nh->get_parameter("odom_only", odom_only);
@@ -147,11 +150,12 @@ void readParameters(shared_ptr<rclcpp::Node> &nh) {
     nh->get_parameter("mapping.extrinsic_T", extrinT);
     nh->get_parameter("mapping.extrinsic_R", extrinR);
     nh->get_parameter("odometry.publish_odometry_without_downsample", publish_odometry_without_downsample);
+    nh->get_parameter("publish_tf", publish_tf);
     nh->get_parameter("publish.path_en", path_en);
     nh->get_parameter("publish.scan_publish_en", scan_pub_en);
     nh->get_parameter("publish.scan_bodyframe_pub_en", scan_body_pub_en);
     nh->get_parameter("runtime_pos_log_enable", runtime_pos_log);
     nh->get_parameter("pcd_save.pcd_save_en", pcd_save_en);
     nh->get_parameter("pcd_save.interval", pcd_save_interval);
+    nh->get_parameter("pcd_save.path", pcd_save_path);
 }
-
